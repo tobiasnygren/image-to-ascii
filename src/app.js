@@ -34,10 +34,10 @@ export function createApp(apiKey) {
     }
 
     // Använd timing-safe comparison för att förhindra timing attacks
-    const providedBuffer = Buffer.from(providedKey);
     const keyBuffer = Buffer.from(apiKey);
-    const isValidKey = providedBuffer.length === keyBuffer.length &&
-      timingSafeEqual(providedBuffer, keyBuffer);
+    const providedBuffer = Buffer.alloc(keyBuffer.length);
+    providedBuffer.write(providedKey);
+    const isValidKey = timingSafeEqual(providedBuffer, keyBuffer);
 
     if (!isValidKey) {
       return c.json({ error: 'Invalid API key.' }, 401);
