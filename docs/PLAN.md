@@ -7,6 +7,7 @@ This project was created as a test project to explore collaboration between a de
 ## Goals
 
 Build a lightweight API that:
+
 1. Receives an uploaded image (any format)
 2. Converts the image to grayscale
 3. Generates ASCII representation of the image
@@ -16,12 +17,12 @@ Build a lightweight API that:
 
 ### Frameworks and Libraries
 
-| Package | Version | Purpose |
-|---------|---------|---------|
-| hono | ^4.0.0 | Lightweight web framework |
-| @hono/node-server | ^1.8.0 | Node.js adapter for Hono |
-| sharp | ^0.33.0 | Image processing |
-| vitest | ^1.0.0 | Test framework |
+| Package           | Version | Purpose                   |
+| ----------------- | ------- | ------------------------- |
+| hono              | ^4.0.0  | Lightweight web framework |
+| @hono/node-server | ^1.8.0  | Node.js adapter for Hono  |
+| sharp             | ^0.33.0 | Image processing          |
+| vitest            | ^1.0.0  | Test framework            |
 
 ### Why These Choices?
 
@@ -77,6 +78,7 @@ main     ← Production-ready code
 Health check - returns API information. Open endpoint.
 
 **Response (200):**
+
 ```json
 {
   "name": "image-to-ascii",
@@ -91,11 +93,13 @@ Health check - returns API information. Open endpoint.
 Converts an uploaded image to ASCII. **Requires authentication.**
 
 **Headers:**
+
 ```
 X-API-Key: your-api-key
 ```
 
 **Request:**
+
 ```
 Content-Type: multipart/form-data
 
@@ -107,6 +111,7 @@ Query parameters (optional):
 ```
 
 **Response (200):**
+
 ```json
 {
   "ascii": "@@@@....####\n@@@@....####\n...",
@@ -115,6 +120,7 @@ Query parameters (optional):
 ```
 
 **Response (400):**
+
 ```json
 {
   "error": "No image provided. Send a file as \"image\" in multipart/form-data."
@@ -122,6 +128,7 @@ Query parameters (optional):
 ```
 
 **Response (401):**
+
 ```json
 {
   "error": "Missing API key. Provide it in X-API-Key header."
@@ -137,21 +144,21 @@ Query parameters (optional):
 
 ### Implemented Protections
 
-| Protection | Description |
-|------------|-------------|
-| API key (mandatory) | `X-API-Key` header required, server won't start without `API_KEY` |
-| Timing-safe comparison | Uses `crypto.timingSafeEqual()` to prevent timing attacks |
-| File size | Max 10 MB per upload |
-| Width limits | 20-200 characters, values outside are adjusted automatically |
-| Error messages | Generic to client, detailed in server logs |
+| Protection             | Description                                                       |
+| ---------------------- | ----------------------------------------------------------------- |
+| API key (mandatory)    | `X-API-Key` header required, server won't start without `API_KEY` |
+| Timing-safe comparison | Uses `crypto.timingSafeEqual()` to prevent timing attacks         |
+| File size              | Max 10 MB per upload                                              |
+| Width limits           | 20-200 characters, values outside are adjusted automatically      |
+| Error messages         | Generic to client, detailed in server logs                        |
 
 ### Not Implemented (recommended for production)
 
-| Protection | Recommendation |
-|------------|----------------|
+| Protection    | Recommendation                               |
+| ------------- | -------------------------------------------- |
 | Rate limiting | Implement at proxy level (nginx, Cloudflare) |
-| HTTPS | Run behind reverse proxy with TLS |
-| Logging | Add structured logging for monitoring |
+| HTTPS         | Run behind reverse proxy with TLS            |
+| Logging       | Add structured logging for monitoring        |
 
 ## Implementation Steps
 
@@ -176,6 +183,7 @@ Query parameters (optional):
 ### Character Set
 
 From dark to light:
+
 ```
 @%#*+=-:.
 ```

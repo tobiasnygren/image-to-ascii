@@ -21,11 +21,14 @@ const app = createApp(API_KEY);
 // Start the server
 const port = process.env.PORT || 3000;
 
-serve({
-  fetch: app.fetch,
-  port
-}, (info) => {
-  console.log(`Server running at http://localhost:${info.port}`);
-});
+serve(
+  {
+    fetch: app.fetch,
+    port
+  },
+  (info) => {
+    console.log(`Server running at http://localhost:${info.port}`);
+  }
+);
 
 export default app;

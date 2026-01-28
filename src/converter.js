@@ -24,8 +24,12 @@ export async function convertToAscii(imageBuffer, options = {}) {
   const imgWidth = metadata.width;
   const imgHeight = metadata.height;
 
-  if (!Number.isFinite(imgWidth) || !Number.isFinite(imgHeight) ||
-      imgWidth <= 0 || imgHeight <= 0) {
+  if (
+    !Number.isFinite(imgWidth) ||
+    !Number.isFinite(imgHeight) ||
+    imgWidth <= 0 ||
+    imgHeight <= 0
+  ) {
     throw new Error('Invalid image dimensions');
   }
 
@@ -36,11 +40,12 @@ export async function convertToAscii(imageBuffer, options = {}) {
 
   // Step 3: Convert to grayscale and scale down
   const { data, info } = await image
-    .greyscale()                    // Convert to grayscale
-    .resize(width, height, {        // Scale to desired size
+    .greyscale() // Convert to grayscale
+    .resize(width, height, {
+      // Scale to desired size
       fit: 'fill'
     })
-    .raw()                          // Get raw pixel data (not PNG/JPG)
+    .raw() // Get raw pixel data (not PNG/JPG)
     .toBuffer({ resolveWithObject: true });
 
   // Step 4: Build ASCII string

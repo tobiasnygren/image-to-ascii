@@ -83,7 +83,7 @@ describe('convertToAscii', () => {
   it('preserves circle shape - dark corners, light middle', async () => {
     const circle = readFileSync('test/fixtures/circle.png');
     const result = await convertToAscii(circle, { width: 40 });
-    const lines = result.split('\n').filter(line => line.length > 0);
+    const lines = result.split('\n').filter((line) => line.length > 0);
 
     // Corners should be dark (@ or similar)
     const topLeft = lines[0][0];
@@ -111,13 +111,17 @@ describe('convertToAscii', () => {
   it('preserves circle symmetry', async () => {
     const circle = readFileSync('test/fixtures/circle.png');
     const result = await convertToAscii(circle, { width: 40 });
-    const lines = result.split('\n').filter(line => line.length > 0);
+    const lines = result.split('\n').filter((line) => line.length > 0);
 
     // Compare left and right halves of the middle line
     const midY = Math.floor(lines.length / 2);
     const midLine = lines[midY];
     const leftHalf = midLine.slice(0, Math.floor(midLine.length / 2));
-    const rightHalf = midLine.slice(Math.ceil(midLine.length / 2)).split('').reverse().join('');
+    const rightHalf = midLine
+      .slice(Math.ceil(midLine.length / 2))
+      .split('')
+      .reverse()
+      .join('');
 
     // They should be approximately equal (allow some deviation due to rounding)
     let matchingChars = 0;
