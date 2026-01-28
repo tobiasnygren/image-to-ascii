@@ -45,18 +45,18 @@ export async function convertToAscii(imageBuffer, options = {}) {
 
   // Steg 4: Bygg ASCII-sträng
   // 'data' är en Buffer där varje byte är ljusstyrkan (0-255) för en pixel
-  let ascii = '';
+  const asciiChars = [];
 
   for (let y = 0; y < info.height; y++) {
     for (let x = 0; x < info.width; x++) {
       const pixelIndex = y * info.width + x;
       const brightness = data[pixelIndex];
-      ascii += brightnessToChar(brightness, charset);
+      asciiChars.push(brightnessToChar(brightness, charset));
     }
-    ascii += '\n';
+    asciiChars.push('\n');
   }
 
-  return ascii;
+  return asciiChars.join('');
 }
 
 /**
