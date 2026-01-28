@@ -105,7 +105,7 @@ Start with `/plan` or ask for "plan mode" to explore and design before implement
 What we built:
 - Working API that converts images to ASCII art
 - Authentication and input validation
-- Comprehensive test suite (18 tests)
+- Comprehensive test suite (21 tests)
 - Documentation of process and decisions
 
 The main gap was **planning before coding** - establishing conventions (code language, linting, documentation standards) upfront would have saved rework and produced a cleaner result.
@@ -119,7 +119,8 @@ Despite this, the project achieved its goals:
 
 If we continue this project:
 
-- [ ] Convert code comments to English
+- [x] Convert code comments to English (completed)
+- [x] Add .claude/instructions.md to prevent language issues in future (completed)
 - [ ] Add ESLint + Prettier
 - [ ] Add pre-commit hooks
 - [ ] Consider adding rate limiting

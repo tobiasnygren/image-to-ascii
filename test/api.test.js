@@ -1,5 +1,5 @@
 /**
- * API-tester för image-to-ascii
+ * API tests for image-to-ascii
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'fs';
@@ -9,7 +9,7 @@ const TEST_API_KEY = 'test-secret-key';
 const app = createApp(TEST_API_KEY);
 
 describe('GET /', () => {
-  it('returnerar API-information utan autentisering', async () => {
+  it('returns API information without authentication', async () => {
     const res = await app.request('/');
 
     expect(res.status).toBe(200);
@@ -20,8 +20,8 @@ describe('GET /', () => {
   });
 });
 
-describe('POST /convert - autentisering', () => {
-  it('returnerar 401 utan API-nyckel', async () => {
+describe('POST /convert - authentication', () => {
+  it('returns 401 without API key', async () => {
     const formData = new FormData();
     formData.append('image', new Blob(['fake']), 'test.png');
 
@@ -36,7 +36,7 @@ describe('POST /convert - autentisering', () => {
     expect(json.error).toContain('Missing API key');
   });
 
-  it('returnerar 401 med fel API-nyckel', async () => {
+  it('returns 401 with wrong API key', async () => {
     const formData = new FormData();
     formData.append('image', new Blob(['fake']), 'test.png');
 
@@ -52,7 +52,7 @@ describe('POST /convert - autentisering', () => {
     expect(json.error).toContain('Invalid API key');
   });
 
-  it('accepterar rätt API-nyckel', async () => {
+  it('accepts correct API key', async () => {
     const imageBuffer = readFileSync('test/fixtures/black.png');
     const formData = new FormData();
     formData.append('image', new Blob([imageBuffer]), 'test.png');
@@ -70,8 +70,8 @@ describe('POST /convert - autentisering', () => {
   });
 });
 
-describe('POST /convert - validering', () => {
-  it('returnerar 400 utan bild', async () => {
+describe('POST /convert - validation', () => {
+  it('returns 400 without image', async () => {
     const res = await app.request('/convert', {
       method: 'POST',
       headers: { 'X-API-Key': TEST_API_KEY }
@@ -83,7 +83,7 @@ describe('POST /convert - validering', () => {
     expect(json.error).toContain('No image provided');
   });
 
-  it('justerar width till minimum om för liten', async () => {
+  it('adjusts width to minimum if too small', async () => {
     const imageBuffer = readFileSync('test/fixtures/black.png');
     const formData = new FormData();
     formData.append('image', new Blob([imageBuffer]), 'test.png');
@@ -97,10 +97,10 @@ describe('POST /convert - validering', () => {
     expect(res.status).toBe(200);
 
     const json = await res.json();
-    expect(json.width).toBe(20); // Minimum är 20
+    expect(json.width).toBe(20); // Minimum is 20
   });
 
-  it('justerar width till maximum om för stor', async () => {
+  it('adjusts width to maximum if too large', async () => {
     const imageBuffer = readFileSync('test/fixtures/black.png');
     const formData = new FormData();
     formData.append('image', new Blob([imageBuffer]), 'test.png');
@@ -114,11 +114,11 @@ describe('POST /convert - validering', () => {
     expect(res.status).toBe(200);
 
     const json = await res.json();
-    expect(json.width).toBe(200); // Maximum är 200
+    expect(json.width).toBe(200); // Maximum is 200
   });
 
-  it('returnerar 400 om fil är för stor', async () => {
-    // Skapa en blob som är större än 10 MB
+  it('returns 400 if file is too large', async () => {
+    // Create a blob larger than 10 MB
     const largeData = new Uint8Array(11 * 1024 * 1024); // 11 MB
     const formData = new FormData();
     formData.append('image', new Blob([largeData]), 'large.png');
@@ -135,7 +135,7 @@ describe('POST /convert - validering', () => {
     expect(json.error).toContain('too large');
   });
 
-  it('hanterar ogiltigt width-värde', async () => {
+  it('handles invalid width value', async () => {
     const imageBuffer = readFileSync('test/fixtures/black.png');
     const formData = new FormData();
     formData.append('image', new Blob([imageBuffer]), 'test.png');
@@ -149,18 +149,18 @@ describe('POST /convert - validering', () => {
     expect(res.status).toBe(200);
 
     const json = await res.json();
-    expect(json.width).toBe(80); // Default när värde är ogiltigt
+    expect(json.width).toBe(80); // Default when value is invalid
   });
 });
 
 describe('createApp', () => {
-  it('kastar fel om API-nyckel saknas', () => {
+  it('throws error if API key is missing', () => {
     expect(() => createApp()).toThrow('API key is required');
     expect(() => createApp('')).toThrow('API key is required');
     expect(() => createApp(null)).toThrow('API key is required');
   });
 
-  it('kastar fel om API-nyckel endast innehåller whitespace', () => {
+  it('throws error if API key contains only whitespace', () => {
     expect(() => createApp('   ')).toThrow('API key is required');
     expect(() => createApp('\t\n')).toThrow('API key is required');
   });

@@ -1,12 +1,12 @@
 /**
  * image-to-ascii API
  *
- * Startar HTTP-servern.
+ * Starts the HTTP server.
  */
 import { serve } from '@hono/node-server';
 import { createApp } from './app.js';
 
-// API-nyckel från miljövariabel (obligatorisk)
+// API key from environment variable (required)
 const API_KEY = process.env.API_KEY;
 
 if (!API_KEY || API_KEY.trim() === '') {
@@ -15,10 +15,10 @@ if (!API_KEY || API_KEY.trim() === '') {
   process.exit(1);
 }
 
-// Skapa appen
+// Create the app
 const app = createApp(API_KEY);
 
-// Starta servern
+// Start the server
 const port = process.env.PORT || 3000;
 
 serve({
