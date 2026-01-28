@@ -1,40 +1,22 @@
 /**
  * image-to-ascii API
  *
- * Startar en HTTP-server som tar emot bilder och returnerar ASCII-konst.
+ * Startar HTTP-servern.
  */
-import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
-import { convertToAscii } from './converter.js';
+import { createApp } from './app.js';
 
-const app = new Hono();
+// API-nyckel från miljövariabel (obligatorisk)
+const API_KEY = process.env.API_KEY;
 
-// Health check
-app.get('/', (c) => {
-  return c.json({
-    name: 'image-to-ascii',
-    version: '0.1.0',
-    endpoints: {
-      convert: 'POST /convert'
-    }
-  });
-});
+if (!API_KEY || API_KEY.trim() === '') {
+  console.error('Error: API_KEY environment variable is required.');
+  console.error('Generate one with: openssl rand -hex 32');
+  process.exit(1);
+}
 
-// Konvertera bild till ASCII
-app.post('/convert', async (c) => {
-  try {
-    // TODO: Hantera filuppladdning med Hono
-    // 1. Hämta uppladdad fil från request
-    // 2. Läs query-parametrar (width)
-    // 3. Anropa convertToAscii
-    // 4. Returnera resultat
-
-    return c.json({ error: 'Not implemented yet' }, 501);
-  } catch (error) {
-    console.error('Conversion error:', error);
-    return c.json({ error: error.message }, 500);
-  }
-});
+// Skapa appen
+const app = createApp(API_KEY);
 
 // Starta servern
 const port = process.env.PORT || 3000;

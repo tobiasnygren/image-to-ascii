@@ -34,14 +34,16 @@ Bygga ett lättviktigt API som:
 ```
 image-to-ascii/
 ├── src/
-│   ├── index.js          # Startar servern
+│   ├── index.js          # API-server med Hono, säkerhet
 │   ├── converter.js      # Bild → ASCII-logik
 │   └── charsets.js       # ASCII-teckenuppsättningar
 ├── test/
-│   ├── converter.test.js # Enhetstester
-│   └── fixtures/         # Testbilder
+│   ├── converter.test.js    # Enhetstester (10 st)
+│   ├── create-test-image.js # Genererar testbilder programmatiskt
+│   └── fixtures/            # Testbilder (gradient, cirkel, etc.)
 ├── docs/
 │   └── PLAN.md           # Denna fil
+├── .env.example          # Mall för miljövariabler
 ├── package.json
 ├── .gitignore
 └── README.md
@@ -65,42 +67,94 @@ main     ← Produktionsklar kod
 
 ## API-specifikation
 
+### GET /
+
+Health check - returnerar API-information. Öppen endpoint.
+
+**Response (200):**
+```json
+{
+  "name": "image-to-ascii",
+  "version": "0.1.0",
+  "endpoints": { "convert": "POST /convert (requires X-API-Key header)" },
+  "limits": { "maxFileSize": "10 MB", "widthRange": "20-200 characters" }
+}
+```
+
 ### POST /convert
 
-Konverterar en uppladdad bild till ASCII.
+Konverterar en uppladdad bild till ASCII. **Kräver autentisering.**
+
+**Headers:**
+```
+X-API-Key: din-api-nyckel
+```
 
 **Request:**
 ```
 Content-Type: multipart/form-data
 
 Body:
-  - image: [bildfil]
+  - image: [bildfil, max 10 MB]
 
 Query-parametrar (valfria):
-  - width: antal tecken bred (default: 80)
+  - width: antal tecken bred, 20-200 (default: 80)
 ```
 
 **Response (200):**
 ```json
 {
-  "ascii": "@@@@....####\n@@@@....####\n..."
+  "ascii": "@@@@....####\n@@@@....####\n...",
+  "width": 80
 }
 ```
 
 **Response (400):**
 ```json
 {
-  "error": "No image provided"
+  "error": "No image provided. Send a file as \"image\" in multipart/form-data."
 }
 ```
 
+**Response (401):**
+```json
+{
+  "error": "Missing API key. Provide it in X-API-Key header."
+}
+```
+
+## Säkerhet
+
+### Principer
+
+- **Ingen osäker default** - Servern vägrar starta utan `API_KEY` miljövariabel
+- **Fail closed** - Vid saknad/felaktig nyckel returneras 401, inte öppen åtkomst
+
+### Implementerade skydd
+
+| Skydd | Beskrivning |
+|-------|-------------|
+| API-nyckel (obligatorisk) | `X-API-Key` header krävs, servern startar inte utan `API_KEY` |
+| Filstorlek | Max 10 MB per uppladdning |
+| Width-gränser | 20-200 tecken, värden utanför justeras automatiskt |
+| Felmeddelanden | Generiska till klient, detaljerade i serverloggar |
+
+### Ej implementerat (rekommenderas för produktion)
+
+| Skydd | Rekommendation |
+|-------|----------------|
+| Rate limiting | Implementera på proxy-nivå (nginx, Cloudflare) |
+| HTTPS | Kör bakom reverse proxy med TLS |
+| Loggning | Lägg till strukturerad loggning för övervakning |
+
 ## Implementationssteg
 
-- [ ] Setup - Initiera projekt, installera beroenden
-- [ ] Converter-modul - Kärnan: bild-buffer → ASCII-sträng
-- [ ] API-endpoint - POST /convert
-- [ ] Tester - Enhetstester för converter
-- [ ] Dokumentation - README med instruktioner
+- [x] Setup - Initiera projekt, installera beroenden
+- [x] Converter-modul - Kärnan: bild-buffer → ASCII-sträng
+- [x] API-endpoint - POST /convert
+- [x] Tester - Enhetstester för converter (10 tester)
+- [x] Säkerhet - API-nyckel, filgränser, inputvalidering
+- [x] Dokumentation - README med instruktioner
 
 ## Algoritm för ASCII-konvertering
 
