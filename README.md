@@ -10,7 +10,7 @@ En webbtjänst som konverterar bilder till ASCII-konst.
 
 **Teknikstack:**
 
-- Node.js (>=18.0.0)
+- Node.js (>=20.17.0)
 - Hono (lättviktigt webbramverk)
 - Sharp (bildbehandling)
 - Vitest (testning)
