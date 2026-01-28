@@ -18,7 +18,9 @@ for (let y = 0; y < height; y++) {
 
 const gradient = await sharp(pixels, {
   raw: { width, height, channels: 1 }
-}).png().toBuffer();
+})
+  .png()
+  .toBuffer();
 
 writeFileSync('test/fixtures/gradient.png', gradient);
 console.log('Created test/fixtures/gradient.png');
@@ -26,7 +28,9 @@ console.log('Created test/fixtures/gradient.png');
 // Create a completely black image
 const black = await sharp(Buffer.alloc(100 * 100, 0), {
   raw: { width: 100, height: 100, channels: 1 }
-}).png().toBuffer();
+})
+  .png()
+  .toBuffer();
 
 writeFileSync('test/fixtures/black.png', black);
 console.log('Created test/fixtures/black.png');
@@ -34,7 +38,9 @@ console.log('Created test/fixtures/black.png');
 // Create a completely white image
 const white = await sharp(Buffer.alloc(100 * 100, 255), {
   raw: { width: 100, height: 100, channels: 1 }
-}).png().toBuffer();
+})
+  .png()
+  .toBuffer();
 
 writeFileSync('test/fixtures/white.png', white);
 console.log('Created test/fixtures/white.png');
@@ -60,7 +66,9 @@ for (let y = 0; y < circleSize; y++) {
 
 const circle = await sharp(circlePixels, {
   raw: { width: circleSize, height: circleSize, channels: 1 }
-}).png().toBuffer();
+})
+  .png()
+  .toBuffer();
 
 writeFileSync('test/fixtures/circle.png', circle);
 console.log('Created test/fixtures/circle.png');

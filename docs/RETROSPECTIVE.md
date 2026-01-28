@@ -103,6 +103,7 @@ Start with `/plan` or ask for "plan mode" to explore and design before implement
 **Verdict: Successful for a test project.**
 
 What we built:
+
 - Working API that converts images to ASCII art
 - Authentication and input validation
 - Comprehensive test suite (21 tests)
@@ -111,6 +112,7 @@ What we built:
 The main gap was **planning before coding** - establishing conventions (code language, linting, documentation standards) upfront would have saved rework and produced a cleaner result.
 
 Despite this, the project achieved its goals:
+
 - Explored AI-assisted development with Claude Code
 - Learned about image processing in Node.js
 - Built something functional and fun
@@ -121,11 +123,11 @@ If we continue this project:
 
 - [x] Convert code comments to English (completed)
 - [x] Add .claude/instructions.md to prevent language issues in future (completed)
-- [ ] Add ESLint + Prettier
-- [ ] Add pre-commit hooks
+- [x] Add ESLint + Prettier (completed)
+- [x] Add pre-commit hooks (completed)
 - [ ] Consider adding rate limiting
 - [ ] Build a simple web UI
 
 ---
 
-*This retrospective was written as part of exploring AI-assisted development with Claude Code.*
+_This retrospective was written as part of exploring AI-assisted development with Claude Code._

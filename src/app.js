@@ -47,8 +47,8 @@ export function createApp(apiKey) {
   };
 
   // Health check (open endpoint)
-  app.get('/', (c) => {
-    return c.json({
+  app.get('/', (c) =>
+    c.json({
       name: 'image-to-ascii',
       version: '0.1.0',
       endpoints: {
@@ -58,8 +58,8 @@ export function createApp(apiKey) {
         maxFileSize: `${MAX_FILE_SIZE / 1024 / 1024} MB`,
         widthRange: `${MIN_WIDTH}-${MAX_WIDTH} characters`
       }
-    });
-  });
+    })
+  );
 
   // Convert image to ASCII (protected endpoint)
   app.post('/convert', requireApiKey, async (c) => {
@@ -69,21 +69,25 @@ export function createApp(apiKey) {
       const file = body['image'];
 
       if (!file || !(file instanceof File)) {
-        return c.json({ error: 'No image provided. Send a file as "image" in multipart/form-data.' }, 400);
+        return c.json(
+          { error: 'No image provided. Send a file as "image" in multipart/form-data.' },
+          400
+        );
       }
 
       // 2. Validate file size
       if (file.size > MAX_FILE_SIZE) {
-        return c.json({
-          error: `File too large. Maximum size is ${MAX_FILE_SIZE / 1024 / 1024} MB.`
-        }, 400);
+        return c.json(
+          {
+            error: `File too large. Maximum size is ${MAX_FILE_SIZE / 1024 / 1024} MB.`
+          },
+          400
+        );
       }
 
       // 3. Read and validate width parameter
       const parsedWidth = parseInt(c.req.query('width'), 10);
-      const width = isNaN(parsedWidth)
-        ? 80
-        : Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, parsedWidth));
+      const width = isNaN(parsedWidth) ? 80 : Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, parsedWidth));
 
       // 4. Convert File to Buffer
       const arrayBuffer = await file.arrayBuffer();
@@ -106,14 +110,20 @@ export function createApp(apiKey) {
         message.includes('corrupt');
 
       if (isInvalidImageError) {
-        return c.json({
-          error: 'Invalid or unsupported image format. Please upload a valid PNG or JPEG.'
-        }, 400);
+        return c.json(
+          {
+            error: 'Invalid or unsupported image format. Please upload a valid PNG or JPEG.'
+          },
+          400
+        );
       }
 
-      return c.json({
-        error: 'Failed to process image. Please try again with a different image.'
-      }, 500);
+      return c.json(
+        {
+          error: 'Failed to process image. Please try again with a different image.'
+        },
+        500
+      );
     }
   });
 
