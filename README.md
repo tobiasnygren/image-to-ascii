@@ -9,7 +9,8 @@ En webbtjänst som konverterar bilder till ASCII-konst.
 **Idé:** Bygga ett enkelt API som tar emot en bild och returnerar en ASCII-representation av den.
 
 **Teknikstack:**
-- Node.js (>=18.0.0)
+
+- Node.js (>=20.17.0)
 - Hono (lättviktigt webbramverk)
 - Sharp (bildbehandling)
 - Vitest (testning)
@@ -29,22 +30,24 @@ cp .env.example .env
 ```
 
 Redigera `.env`:
+
 ```bash
 # Generera en säker nyckel
 API_KEY=$(openssl rand -hex 32)
 echo "API_KEY=$API_KEY" > .env
 ```
 
-| Miljövariabel | Beskrivning | Obligatorisk |
-|---------------|-------------|--------------|
-| `API_KEY` | Nyckel för autentisering | Ja |
-| `PORT` | Port för servern | Nej (default: 3000) |
+| Miljövariabel | Beskrivning              | Obligatorisk        |
+| ------------- | ------------------------ | ------------------- |
+| `API_KEY`     | Nyckel för autentisering | Ja                  |
+| `PORT`        | Port för servern         | Nej (default: 3000) |
 
 > **Obs:** Servern vägrar starta utan `API_KEY`. Detta säkerställer att API:et aldrig körs oskyddat.
 
 ## Användning
 
 Starta servern:
+
 ```bash
 npm start
 ```
@@ -52,6 +55,7 @@ npm start
 Servern läser `API_KEY` från `.env`-filen (se Konfiguration ovan).
 
 Konvertera en bild:
+
 ```bash
 curl -X POST \
   -H "X-API-Key: $API_KEY" \
@@ -62,6 +66,7 @@ curl -X POST \
 > **Tips:** Använd `source .env` för att ladda miljövariabler i din shell innan du kör curl.
 
 Exempel på output:
+
 ```
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @@@@@@@@@@@%#****#%@@@@@@@@@@@
@@ -97,6 +102,7 @@ npm run test:run
 Returnerar API-information och gränser. Kräver ingen autentisering.
 
 **Response:**
+
 ```json
 {
   "name": "image-to-ascii",
@@ -116,16 +122,20 @@ Returnerar API-information och gränser. Kräver ingen autentisering.
 Konverterar en uppladdad bild till ASCII. **Kräver autentisering.**
 
 **Headers:**
+
 - `X-API-Key` - Din API-nyckel (obligatorisk om `API_KEY` är satt)
 
 **Request:**
+
 - Content-Type: `multipart/form-data`
 - Body: `image` - bildfilen (max 10 MB)
 
 **Query-parametrar:**
+
 - `width` (valfri) - antal tecken bred, 20-200 (default: 80)
 
 **Response (200):**
+
 ```json
 {
   "ascii": "@@@@....####\n@@@@....####\n...",
@@ -135,22 +145,22 @@ Konverterar en uppladdad bild till ASCII. **Kräver autentisering.**
 
 **Felresponser:**
 
-| Status | Beskrivning |
-|--------|-------------|
-| 400 | Ingen bild, för stor fil, eller ogiltigt format |
-| 401 | Saknad eller ogiltig API-nyckel |
-| 500 | Internt fel vid konvertering |
+| Status | Beskrivning                                     |
+| ------ | ----------------------------------------------- |
+| 400    | Ingen bild, för stor fil, eller ogiltigt format |
+| 401    | Saknad eller ogiltig API-nyckel                 |
+| 500    | Internt fel vid konvertering                    |
 
 ## Säkerhet
 
 API:et har följande skydd:
 
-| Skydd | Beskrivning |
-|-------|-------------|
-| **API-nyckel** | Alla requests till `/convert` kräver giltig `X-API-Key` header |
-| **Filstorlek** | Max 10 MB per uppladdning |
-| **Width-gränser** | Begränsat till 20-200 tecken för att förhindra resursattacker |
-| **Felmeddelanden** | Generiska fel till klient (läcker inte intern information) |
+| Skydd              | Beskrivning                                                    |
+| ------------------ | -------------------------------------------------------------- |
+| **API-nyckel**     | Alla requests till `/convert` kräver giltig `X-API-Key` header |
+| **Filstorlek**     | Max 10 MB per uppladdning                                      |
+| **Width-gränser**  | Begränsat till 20-200 tecken för att förhindra resursattacker  |
+| **Felmeddelanden** | Generiska fel till klient (läcker inte intern information)     |
 
 ### Rekommendationer för produktion
 
@@ -170,6 +180,7 @@ Detta avsnitt dokumenterar vår process - hur projektet kom till och utvecklades
 Projektet startade med en enkel idé vid morgonkaffet: "Tänk om man kunde konvertera bilder till ASCII-tecken via ett API?"
 
 Utvecklaren (backend-programmerare med erfarenhet av PHP, Node.js och C#) ville:
+
 - Utforska bildhantering i Node.js (ett område utan tidigare erfarenhet)
 - Bygga något konkret och fungerande
 - Förstå koden som skapas (inte för komplext)
@@ -179,18 +190,21 @@ Utvecklaren (backend-programmerare med erfarenhet av PHP, Node.js och C#) ville:
 
 **Varför Hono istället för Express?**
 Express kändes för stort för projektet. Med Hono håller vi dörren öppen för:
+
 - CLI-verktyg
 - Serverless-deployment (Cloudflare Workers, AWS Lambda)
 - Enklare kodbas
 
 **Varför Sharp?**
 Sharp är ett etablerat bibliotek för bildbehandling i Node.js. Det är snabbt och hanterar det vi behöver:
+
 - Läsa olika bildformat
 - Konvertera till gråskala
 - Hämta pixeldata
 
 **Varför API-nyckel för autentisering?**
 Enklast möjliga säkerhet som fungerar. Passar för:
+
 - Testprojekt och interna verktyg
 - Lätt att förstå och implementera
 - Kan enkelt uppgraderas senare
@@ -220,6 +234,7 @@ Så här gick utvecklingen till:
 ### Lärdomar
 
 Se [docs/RETROSPECTIVE.md](docs/RETROSPECTIVE.md) för en fullständig genomgång av:
+
 - Vad som fungerade bra
 - Vad som kunde gjorts bättre
 - Tips för framtida projekt med Claude Code

@@ -1,7 +1,7 @@
 {
   "name": "image-to-ascii",
   "version": "0.1.0",
-  "description": "En webbtjänst som konverterar bilder till ASCII-konst",
+  "description": "A web service that converts images to ASCII art",
   "type": "module",
   "main": "src/index.js",
   "scripts": {
@@ -9,7 +9,12 @@
     "dev": "node --watch src/index.js",
     "test": "vitest",
     "test:run": "vitest run",
-    "generate-fixtures": "node test/create-test-image.js"
+    "generate-fixtures": "node test/create-test-image.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
   },
   "keywords": [
     "ascii",
@@ -20,14 +25,28 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "hono": "^4.0.0",
     "@hono/node-server": "^1.8.0",
+    "hono": "^4.0.0",
     "sharp": "^0.33.0"
   },
   "devDependencies": {
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.8.1",
     "vitest": "^1.0.0"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.17.0"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
   }
 }
