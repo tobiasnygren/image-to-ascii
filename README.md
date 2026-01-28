@@ -217,16 +217,10 @@ Så här gick utvecklingen till:
 
 ### Lärdomar
 
-**Vad fungerade bra:**
-- Att diskutera och planera innan kodning sparar tid
-- Att be om förklaringar gör koden begriplig
-- Att committa ofta ger trygghet och tydlig historik
-- Att testa tidigt fångar problem snabbt
-
-**Bildhantering i Node.js:**
-- Sharp gör det enkelt - `.greyscale().resize().raw()` ger pixeldata
-- Tecken är ~2x så höga som breda, så höjden måste justeras
-- Att skapa testbilder programmatiskt är smidigt för reproducerbara tester
+Se [docs/RETROSPECTIVE.md](docs/RETROSPECTIVE.md) för en fullständig genomgång av:
+- Vad som fungerade bra
+- Vad som kunde gjorts bättre
+- Tips för framtida projekt med Claude Code
 
 ---
 
@@ -243,7 +237,8 @@ image-to-ascii/
 │   ├── create-test-image.js  # Genererar testbilder
 │   └── fixtures/         # Testbilder (genererade)
 ├── docs/
-│   └── PLAN.md           # Projektplan och beslut
+│   ├── PLAN.md           # Projektplan och beslut
+│   └── RETROSPECTIVE.md  # Lärdomar från projektet
 ├── .env.example          # Mall för miljövariabler
 ├── package.json
 └── README.md
