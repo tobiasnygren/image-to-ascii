@@ -1,75 +1,80 @@
-# Projektplan: image-to-ascii
+# Project Plan: image-to-ascii
 
-## Bakgrund
+## Background
 
-Detta projekt skapades som ett testprojekt för att utforska samarbete mellan en utvecklare och Claude Code. Idén föddes vid morgonkaffet: bygga en enkel webbtjänst som konverterar bilder till ASCII-konst.
+This project was created as a test project to explore collaboration between a developer and Claude Code. The idea came over morning coffee: build a simple web service that converts images to ASCII art.
 
-## Mål
+## Goals
 
-Bygga ett lättviktigt API som:
-1. Tar emot en uppladdad bild (valfritt format)
-2. Konverterar bilden till gråskala
-3. Genererar ASCII-representation av bilden
-4. Returnerar ASCII-konsten som text
+Build a lightweight API that:
+1. Receives an uploaded image (any format)
+2. Converts the image to grayscale
+3. Generates ASCII representation of the image
+4. Returns the ASCII art as text
 
-## Tekniska beslut
+## Technical Decisions
 
-### Ramverk och bibliotek
+### Frameworks and Libraries
 
-| Paket | Version | Syfte |
-|-------|---------|-------|
-| hono | ^4.0.0 | Lättviktigt webbramverk |
-| @hono/node-server | ^1.8.0 | Node.js-adapter för Hono |
-| sharp | ^0.33.0 | Bildbehandling |
-| vitest | ^1.0.0 | Testramverk |
+| Package | Version | Purpose |
+|---------|---------|---------|
+| hono | ^4.0.0 | Lightweight web framework |
+| @hono/node-server | ^1.8.0 | Node.js adapter for Hono |
+| sharp | ^0.33.0 | Image processing |
+| vitest | ^1.0.0 | Test framework |
 
-### Varför dessa val?
+### Why These Choices?
 
-- **Hono** istället för Express: Lättviktigt (3kb), fungerar i Node, Bun, Cloudflare Workers, AWS Lambda. Möjliggör framtida CLI-verktyg eller serverless-deployment utan omskrivning.
-- **Sharp**: Snabb bildbehandling via libvips. Hanterar de flesta bildformat, gråskalekonvertering och pixelåtkomst.
-- **Vitest**: Modernt, snabbt testramverk med bra DX.
+- **Hono** instead of Express: Lightweight (3kb), works in Node, Bun, Cloudflare Workers, AWS Lambda. Enables future CLI tools or serverless deployment without rewriting.
+- **Sharp**: Fast image processing via libvips. Handles most image formats, grayscale conversion, and pixel access.
+- **Vitest**: Modern, fast test framework with good DX.
 
-## Projektstruktur
+## Project Structure
 
 ```
 image-to-ascii/
 ├── src/
-│   ├── index.js          # API-server med Hono, säkerhet
-│   ├── converter.js      # Bild → ASCII-logik
-│   └── charsets.js       # ASCII-teckenuppsättningar
+│   ├── index.js          # API server with Hono, security
+│   ├── app.js            # Hono application (separated for testing)
+│   ├── converter.js      # Image → ASCII logic
+│   └── charsets.js       # ASCII character sets
 ├── test/
-│   ├── converter.test.js    # Enhetstester (10 st)
-│   ├── create-test-image.js # Genererar testbilder programmatiskt
-│   └── fixtures/            # Testbilder (gradient, cirkel, etc.)
+│   ├── api.test.js          # API tests (11 tests)
+│   ├── converter.test.js    # Unit tests (10 tests)
+│   ├── create-test-image.js # Generates test images programmatically
+│   └── fixtures/            # Test images (gradient, circle, etc.)
 ├── docs/
-│   └── PLAN.md           # Denna fil
-├── .env.example          # Mall för miljövariabler
+│   ├── PLAN.md              # This file
+│   └── RETROSPECTIVE.md     # Lessons learned
+├── .claude/
+│   └── instructions.md      # Instructions for Claude Code
+├── .env.example          # Template for environment variables
 ├── package.json
 ├── .gitignore
 └── README.md
 ```
 
-## Git-workflow
+## Git Workflow
 
-Vi använder Git Flow:
+We use Git Flow:
 
 ```
-main     ← Produktionsklar kod
+main     ← Production-ready code
   │
   └── dev     ← Integration/test
         │
-        └── feature/*  ← Utveckling
+        └── feature/*  ← Development
 ```
 
-- Utveckling sker i feature-branches
-- Merge till `dev` för integration/test
-- Merge till `main` när stabilt
+- Development happens in feature branches
+- Merge to `dev` for integration/testing
+- Merge to `main` when stable
 
-## API-specifikation
+## API Specification
 
 ### GET /
 
-Health check - returnerar API-information. Öppen endpoint.
+Health check - returns API information. Open endpoint.
 
 **Response (200):**
 ```json
@@ -83,11 +88,11 @@ Health check - returnerar API-information. Öppen endpoint.
 
 ### POST /convert
 
-Konverterar en uppladdad bild till ASCII. **Kräver autentisering.**
+Converts an uploaded image to ASCII. **Requires authentication.**
 
 **Headers:**
 ```
-X-API-Key: din-api-nyckel
+X-API-Key: your-api-key
 ```
 
 **Request:**
@@ -95,10 +100,10 @@ X-API-Key: din-api-nyckel
 Content-Type: multipart/form-data
 
 Body:
-  - image: [bildfil, max 10 MB]
+  - image: [image file, max 10 MB]
 
-Query-parametrar (valfria):
-  - width: antal tecken bred, 20-200 (default: 80)
+Query parameters (optional):
+  - width: number of characters wide, 20-200 (default: 80)
 ```
 
 **Response (200):**
@@ -123,62 +128,71 @@ Query-parametrar (valfria):
 }
 ```
 
-## Säkerhet
+## Security
 
-### Principer
+### Principles
 
-- **Ingen osäker default** - Servern vägrar starta utan `API_KEY` miljövariabel
-- **Fail closed** - Vid saknad/felaktig nyckel returneras 401, inte öppen åtkomst
+- **No insecure defaults** - Server refuses to start without `API_KEY` environment variable
+- **Fail closed** - Missing/incorrect key returns 401, not open access
 
-### Implementerade skydd
+### Implemented Protections
 
-| Skydd | Beskrivning |
-|-------|-------------|
-| API-nyckel (obligatorisk) | `X-API-Key` header krävs, servern startar inte utan `API_KEY` |
-| Filstorlek | Max 10 MB per uppladdning |
-| Width-gränser | 20-200 tecken, värden utanför justeras automatiskt |
-| Felmeddelanden | Generiska till klient, detaljerade i serverloggar |
+| Protection | Description |
+|------------|-------------|
+| API key (mandatory) | `X-API-Key` header required, server won't start without `API_KEY` |
+| Timing-safe comparison | Uses `crypto.timingSafeEqual()` to prevent timing attacks |
+| File size | Max 10 MB per upload |
+| Width limits | 20-200 characters, values outside are adjusted automatically |
+| Error messages | Generic to client, detailed in server logs |
 
-### Ej implementerat (rekommenderas för produktion)
+### Not Implemented (recommended for production)
 
-| Skydd | Rekommendation |
-|-------|----------------|
-| Rate limiting | Implementera på proxy-nivå (nginx, Cloudflare) |
-| HTTPS | Kör bakom reverse proxy med TLS |
-| Loggning | Lägg till strukturerad loggning för övervakning |
+| Protection | Recommendation |
+|------------|----------------|
+| Rate limiting | Implement at proxy level (nginx, Cloudflare) |
+| HTTPS | Run behind reverse proxy with TLS |
+| Logging | Add structured logging for monitoring |
 
-## Implementationssteg
+## Implementation Steps
 
-- [x] Setup - Initiera projekt, installera beroenden
-- [x] Converter-modul - Kärnan: bild-buffer → ASCII-sträng
-- [x] API-endpoint - POST /convert
-- [x] Tester - Enhetstester för converter (10 tester)
-- [x] Säkerhet - API-nyckel, filgränser, inputvalidering
-- [x] Dokumentation - README med instruktioner
+- [x] Setup - Initialize project, install dependencies
+- [x] Converter module - Core: image buffer → ASCII string
+- [x] API endpoint - POST /convert
+- [x] Tests - Unit tests for converter (10 tests) + API tests (11 tests)
+- [x] Security - API key, file limits, input validation
+- [x] Documentation - README with instructions
+- [x] Code review - Address GitHub Copilot feedback
+- [x] Translation - Translate all Swedish comments to English
 
-## Algoritm för ASCII-konvertering
+## Algorithm for ASCII Conversion
 
-1. Ladda bilden med sharp
-2. Konvertera till gråskala
-3. Skala ner till önskad bredd (behåll proportioner, justera för teckenförhållande)
-4. Hämta pixeldata som en array av ljusstyrka-värden (0-255)
-5. Mappa varje värde till ett ASCII-tecken baserat på ljusstyrka
-6. Bygg ihop till en sträng med radbrytningar
+1. Load the image with sharp
+2. Convert to grayscale
+3. Scale down to desired width (maintain proportions, adjust for character aspect ratio)
+4. Get pixel data as an array of brightness values (0-255)
+5. Map each value to an ASCII character based on brightness
+6. Build into a string with line breaks
 
-### Teckenuppsättning
+### Character Set
 
-Från mörkt till ljust:
+From dark to light:
 ```
 @%#*+=-:.
 ```
 
-Mörkare tecken (som @) används för låga värden (mörka pixlar), ljusare tecken (som .) för höga värden (ljusa pixlar).
+Darker characters (like @) are used for low values (dark pixels), lighter characters (like .) for high values (light pixels).
 
-## Framtida iterationer
+## Future Iterations
 
-1. Webbgränssnitt för uppladdning och visning
-2. CLI-verktyg
+1. Web interface for upload and display
+2. CLI tool
 3. Serverless deployment (Cloudflare Workers)
-4. Fler teckenuppsättningar
-5. Stöd för URL-input
-6. Färg-ASCII med ANSI-koder
+4. More character sets
+5. Support for URL input
+6. Color ASCII with ANSI codes
+
+## Code Language Policy
+
+All code, comments, and test descriptions in this project are written in English. This was addressed in a dedicated translation effort after the initial development phase (which was done with Swedish comments due to the conversation language).
+
+A `.claude/instructions.md` file has been added to ensure future Claude Code sessions maintain English code regardless of conversation language.

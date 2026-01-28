@@ -1,17 +1,17 @@
 /**
- * Skapar testbilder för converter-testerna
+ * Creates test images for the converter tests
  */
 import sharp from 'sharp';
 import { writeFileSync } from 'fs';
 
-// Skapa en 100x100 gradient (svart till vit, vänster till höger)
+// Create a 100x100 gradient (black to white, left to right)
 const width = 100;
 const height = 100;
 const pixels = Buffer.alloc(width * height);
 
 for (let y = 0; y < height; y++) {
   for (let x = 0; x < width; x++) {
-    // Gradient från vänster (svart) till höger (vit)
+    // Gradient from left (black) to right (white)
     pixels[y * width + x] = Math.round((x / width) * 255);
   }
 }
@@ -23,7 +23,7 @@ const gradient = await sharp(pixels, {
 writeFileSync('test/fixtures/gradient.png', gradient);
 console.log('Created test/fixtures/gradient.png');
 
-// Skapa en helt svart bild
+// Create a completely black image
 const black = await sharp(Buffer.alloc(100 * 100, 0), {
   raw: { width: 100, height: 100, channels: 1 }
 }).png().toBuffer();
@@ -31,7 +31,7 @@ const black = await sharp(Buffer.alloc(100 * 100, 0), {
 writeFileSync('test/fixtures/black.png', black);
 console.log('Created test/fixtures/black.png');
 
-// Skapa en helt vit bild
+// Create a completely white image
 const white = await sharp(Buffer.alloc(100 * 100, 255), {
   raw: { width: 100, height: 100, channels: 1 }
 }).png().toBuffer();
@@ -39,7 +39,7 @@ const white = await sharp(Buffer.alloc(100 * 100, 255), {
 writeFileSync('test/fixtures/white.png', white);
 console.log('Created test/fixtures/white.png');
 
-// Skapa en vit cirkel på svart bakgrund
+// Create a white circle on black background
 const circleSize = 100;
 const circlePixels = Buffer.alloc(circleSize * circleSize);
 const centerX = circleSize / 2;
@@ -48,12 +48,12 @@ const radius = 40;
 
 for (let y = 0; y < circleSize; y++) {
   for (let x = 0; x < circleSize; x++) {
-    // Beräkna avstånd från centrum
+    // Calculate distance from center
     const dx = x - centerX;
     const dy = y - centerY;
     const distance = Math.sqrt(dx * dx + dy * dy);
 
-    // Vit (255) inuti cirkeln, svart (0) utanför
+    // White (255) inside the circle, black (0) outside
     circlePixels[y * circleSize + x] = distance <= radius ? 255 : 0;
   }
 }

@@ -1,26 +1,26 @@
 /**
- * Konverterar bilder till ASCII-konst
+ * Converts images to ASCII art
  */
 import sharp from 'sharp';
 import { standard as defaultCharset } from './charsets.js';
 
 /**
- * Konverterar en bild-buffer till ASCII-text
+ * Converts an image buffer to ASCII text
  *
- * @param {Buffer} imageBuffer - Bilddata som Buffer
- * @param {Object} options - Inställningar
- * @param {number} options.width - Önskad bredd i tecken (default: 80)
- * @param {string} options.charset - Teckenuppsättning att använda
- * @returns {Promise<string>} ASCII-representation av bilden
+ * @param {Buffer} imageBuffer - Image data as Buffer
+ * @param {Object} options - Settings
+ * @param {number} options.width - Desired width in characters (default: 80)
+ * @param {string} options.charset - Character set to use
+ * @returns {Promise<string>} ASCII representation of the image
  */
 export async function convertToAscii(imageBuffer, options = {}) {
   const { width = 80, charset = defaultCharset } = options;
 
-  // Steg 1: Ladda bilden och hämta metadata
+  // Step 1: Load the image and get metadata
   const image = sharp(imageBuffer);
   const metadata = await image.metadata();
 
-  // Validera att bilden har giltiga dimensioner
+  // Validate that the image has valid dimensions
   const imgWidth = metadata.width;
   const imgHeight = metadata.height;
 
@@ -29,22 +29,22 @@ export async function convertToAscii(imageBuffer, options = {}) {
     throw new Error('Invalid image dimensions');
   }
 
-  // Steg 2: Beräkna höjd med justering för teckenproportioner
-  // Tecken är ungefär dubbelt så höga som breda, så vi halverar höjden
+  // Step 2: Calculate height with adjustment for character proportions
+  // Characters are roughly twice as tall as they are wide, so we halve the height
   const aspectRatio = imgHeight / imgWidth;
   const height = Math.max(1, Math.round(width * aspectRatio * 0.5));
 
-  // Steg 3: Konvertera till gråskala och skala ner
+  // Step 3: Convert to grayscale and scale down
   const { data, info } = await image
-    .greyscale()                    // Konvertera till gråskala
-    .resize(width, height, {        // Skala till önskad storlek
+    .greyscale()                    // Convert to grayscale
+    .resize(width, height, {        // Scale to desired size
       fit: 'fill'
     })
-    .raw()                          // Hämta rå pixeldata (inte PNG/JPG)
+    .raw()                          // Get raw pixel data (not PNG/JPG)
     .toBuffer({ resolveWithObject: true });
 
-  // Steg 4: Bygg ASCII-sträng
-  // 'data' är en Buffer där varje byte är ljusstyrkan (0-255) för en pixel
+  // Step 4: Build ASCII string
+  // 'data' is a Buffer where each byte is the brightness (0-255) for a pixel
   const asciiChars = [];
 
   for (let y = 0; y < info.height; y++) {
@@ -60,14 +60,14 @@ export async function convertToAscii(imageBuffer, options = {}) {
 }
 
 /**
- * Mappar ett ljusstyrka-värde (0-255) till ett ASCII-tecken
+ * Maps a brightness value (0-255) to an ASCII character
  *
- * @param {number} brightness - Ljusstyrka 0-255 (0 = svart, 255 = vit)
- * @param {string} charset - Teckenuppsättning (mörkt till ljust)
- * @returns {string} Ett ASCII-tecken
+ * @param {number} brightness - Brightness 0-255 (0 = black, 255 = white)
+ * @param {string} charset - Character set (dark to light)
+ * @returns {string} An ASCII character
  */
 export function brightnessToChar(brightness, charset = defaultCharset) {
-  // Normalisera till index i charset
+  // Normalize to index in charset
   const index = Math.floor((brightness / 255) * (charset.length - 1));
   return charset[index];
 }

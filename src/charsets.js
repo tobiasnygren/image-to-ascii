@@ -1,21 +1,21 @@
 /**
- * ASCII-teckenuppsättningar för bildkonvertering
+ * ASCII character sets for image conversion
  *
- * Tecknen är ordnade från mörkt till ljust.
- * Mörkare tecken används för låga pixelvärden (mörka områden),
- * ljusare tecken för höga pixelvärden (ljusa områden).
+ * Characters are ordered from dark to light.
+ * Darker characters are used for low pixel values (dark areas),
+ * lighter characters for high pixel values (light areas).
  */
 
-// Standard teckenuppsättning - 10 nivåer
+// Standard character set - 10 levels
 export const standard = '@%#*+=-:. ';
 
-// Enkel teckenuppsättning - 4 nivåer
+// Simple character set - 4 levels
 export const simple = '@#:. ';
 
-// Detaljerad teckenuppsättning - fler nyanser
+// Detailed character set - more shades
 export const detailed = '$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,"^`\'. ';
 
-// Block-tecken (för terminal som stödjer unicode)
+// Block characters (for terminals that support unicode)
 export const blocks = '\u2588\u2593\u2592\u2591 ';
 
 // Default export
