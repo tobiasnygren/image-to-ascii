@@ -15,7 +15,7 @@ export const simple = '@#:. ';
 // Detailed character set - more shades
 export const detailed = '$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,"^`\'. ';
 
-// Block characters (for terminals that support unicode)
+// Block characters (for terminals that support Unicode)
 export const blocks = '\u2588\u2593\u2592\u2591 ';
 
 // Default export

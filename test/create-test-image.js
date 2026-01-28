@@ -12,7 +12,7 @@ const pixels = Buffer.alloc(width * height);
 for (let y = 0; y < height; y++) {
   for (let x = 0; x < width; x++) {
     // Gradient from left (black) to right (white)
-    pixels[y * width + x] = Math.round((x / width) * 255);
+    pixels[y * width + x] = width === 1 ? 0 : Math.round((x / (width - 1)) * 255);
   }
 }
 
