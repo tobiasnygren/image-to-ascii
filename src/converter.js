@@ -20,10 +20,19 @@ export async function convertToAscii(imageBuffer, options = {}) {
   const image = sharp(imageBuffer);
   const metadata = await image.metadata();
 
+  // Validera att bilden har giltiga dimensioner
+  const imgWidth = metadata.width;
+  const imgHeight = metadata.height;
+
+  if (!Number.isFinite(imgWidth) || !Number.isFinite(imgHeight) ||
+      imgWidth <= 0 || imgHeight <= 0) {
+    throw new Error('Invalid image dimensions');
+  }
+
   // Steg 2: Beräkna höjd med justering för teckenproportioner
   // Tecken är ungefär dubbelt så höga som breda, så vi halverar höjden
-  const aspectRatio = metadata.height / metadata.width;
-  const height = Math.round(width * aspectRatio * 0.5);
+  const aspectRatio = imgHeight / imgWidth;
+  const height = Math.max(1, Math.round(width * aspectRatio * 0.5));
 
   // Steg 3: Konvertera till gråskala och skala ner
   const { data, info } = await image

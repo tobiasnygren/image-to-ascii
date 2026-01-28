@@ -4,6 +4,7 @@
  * Separerad från index.js för att möjliggöra testning.
  */
 import { Hono } from 'hono';
+import { timingSafeEqual } from 'crypto';
 import { convertToAscii } from './converter.js';
 
 // Säkerhetskonfiguration
@@ -18,7 +19,7 @@ const MAX_WIDTH = 200;
  * @returns {Hono} Konfigurerad Hono-app
  */
 export function createApp(apiKey) {
-  if (!apiKey) {
+  if (!apiKey || apiKey.trim() === '') {
     throw new Error('API key is required');
   }
 
@@ -32,7 +33,13 @@ export function createApp(apiKey) {
       return c.json({ error: 'Missing API key. Provide it in X-API-Key header.' }, 401);
     }
 
-    if (providedKey !== apiKey) {
+    // Använd timing-safe comparison för att förhindra timing attacks
+    const providedBuffer = Buffer.from(providedKey);
+    const keyBuffer = Buffer.from(apiKey);
+    const isValidKey = providedBuffer.length === keyBuffer.length &&
+      timingSafeEqual(providedBuffer, keyBuffer);
+
+    if (!isValidKey) {
       return c.json({ error: 'Invalid API key.' }, 401);
     }
 
@@ -73,8 +80,10 @@ export function createApp(apiKey) {
       }
 
       // 3. Läs och validera width-parameter
-      let width = parseInt(c.req.query('width')) || 80;
-      width = Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, width));
+      const parsedWidth = parseInt(c.req.query('width'), 10);
+      const width = isNaN(parsedWidth)
+        ? 80
+        : Math.max(MIN_WIDTH, Math.min(MAX_WIDTH, parsedWidth));
 
       // 4. Konvertera File till Buffer
       const arrayBuffer = await file.arrayBuffer();
@@ -87,8 +96,24 @@ export function createApp(apiKey) {
       return c.json({ ascii, width });
     } catch (error) {
       console.error('Conversion error:', error);
-      // Ge inte detaljerade felmeddelanden till klienten
-      return c.json({ error: 'Failed to convert image. Ensure the file is a valid image.' }, 500);
+
+      // Kategorisera fel för mer hjälpsamma meddelanden utan att läcka intern info
+      const message = error?.message?.toLowerCase() || '';
+      const isInvalidImageError =
+        message.includes('unsupported') ||
+        message.includes('invalid') ||
+        message.includes('decode') ||
+        message.includes('corrupt');
+
+      if (isInvalidImageError) {
+        return c.json({
+          error: 'Invalid or unsupported image format. Please upload a valid PNG or JPEG.'
+        }, 400);
+      }
+
+      return c.json({
+        error: 'Failed to process image. Please try again with a different image.'
+      }, 500);
     }
   });
 

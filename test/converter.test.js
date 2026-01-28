@@ -125,8 +125,9 @@ describe('convertToAscii', () => {
       if (leftHalf[i] === rightHalf[i]) matchingChars++;
     }
 
-    // Minst 80% av tecknen ska matcha för symmetri
+    // Minst 90% av tecknen ska matcha för symmetri
+    // (tillåter viss avvikelse pga avrundning i resize)
     const matchRatio = matchingChars / leftHalf.length;
-    expect(matchRatio).toBeGreaterThan(0.8);
+    expect(matchRatio).toBeGreaterThanOrEqual(0.9);
   });
 });

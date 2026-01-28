@@ -2,7 +2,7 @@
 
 En webbtjänst som konverterar bilder till ASCII-konst.
 
-> **Testprojekt**: Detta projekt skapades som ett experiment i samarbete mellan en utvecklare och [Claude Code](https://github.com/anthropics/claude-code) - Anthropics CLI för Claude. Syftet är att utforska hur AI-assisterad utveckling fungerar i praktiken.
+> **Testprojekt**: Detta projekt skapades som ett experiment i samarbete mellan en utvecklare och [Claude Code](https://docs.anthropic.com/en/docs/claude-code) - Anthropics CLI för Claude. Syftet är att utforska hur AI-assisterad utveckling fungerar i praktiken.
 
 ## Om projektet
 
@@ -47,17 +47,19 @@ echo "API_KEY=$API_KEY" > .env
 Starta servern:
 ```bash
 npm start
-# eller med API-nyckel inline:
-API_KEY="din-hemliga-nyckel" npm start
 ```
+
+Servern läser `API_KEY` från `.env`-filen (se Konfiguration ovan).
 
 Konvertera en bild:
 ```bash
 curl -X POST \
-  -H "X-API-Key: din-hemliga-nyckel" \
+  -H "X-API-Key: $API_KEY" \
   -F "image=@din-bild.png" \
   "http://localhost:3000/convert?width=80"
 ```
+
+> **Tips:** Använd `source .env` för att ladda miljövariabler i din shell innan du kör curl.
 
 Exempel på output:
 ```

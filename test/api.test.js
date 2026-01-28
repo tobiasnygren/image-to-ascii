@@ -116,6 +116,41 @@ describe('POST /convert - validering', () => {
     const json = await res.json();
     expect(json.width).toBe(200); // Maximum är 200
   });
+
+  it('returnerar 400 om fil är för stor', async () => {
+    // Skapa en blob som är större än 10 MB
+    const largeData = new Uint8Array(11 * 1024 * 1024); // 11 MB
+    const formData = new FormData();
+    formData.append('image', new Blob([largeData]), 'large.png');
+
+    const res = await app.request('/convert', {
+      method: 'POST',
+      headers: { 'X-API-Key': TEST_API_KEY },
+      body: formData
+    });
+
+    expect(res.status).toBe(400);
+
+    const json = await res.json();
+    expect(json.error).toContain('too large');
+  });
+
+  it('hanterar ogiltigt width-värde', async () => {
+    const imageBuffer = readFileSync('test/fixtures/black.png');
+    const formData = new FormData();
+    formData.append('image', new Blob([imageBuffer]), 'test.png');
+
+    const res = await app.request('/convert?width=invalid', {
+      method: 'POST',
+      headers: { 'X-API-Key': TEST_API_KEY },
+      body: formData
+    });
+
+    expect(res.status).toBe(200);
+
+    const json = await res.json();
+    expect(json.width).toBe(80); // Default när värde är ogiltigt
+  });
 });
 
 describe('createApp', () => {
@@ -123,5 +158,10 @@ describe('createApp', () => {
     expect(() => createApp()).toThrow('API key is required');
     expect(() => createApp('')).toThrow('API key is required');
     expect(() => createApp(null)).toThrow('API key is required');
+  });
+
+  it('kastar fel om API-nyckel endast innehåller whitespace', () => {
+    expect(() => createApp('   ')).toThrow('API key is required');
+    expect(() => createApp('\t\n')).toThrow('API key is required');
   });
 });
