@@ -1,19 +1,19 @@
 # image-to-ascii
 
-En webbtjänst som konverterar bilder till ASCII-konst.
+A web service that converts images to ASCII art.
 
-> **Testprojekt**: Detta projekt skapades som ett experiment i samarbete mellan en utvecklare och [Claude Code](https://docs.anthropic.com/en/docs/claude-code) - Anthropics CLI för Claude. Syftet är att utforska hur AI-assisterad utveckling fungerar i praktiken.
+> **Test Project**: This project was created as an experiment in collaboration between a developer and [Claude Code](https://docs.anthropic.com/en/docs/claude-code) - Anthropic's CLI for Claude. The purpose is to explore how AI-assisted development works in practice.
 
-## Om projektet
+## About the Project
 
-**Idé:** Bygga ett enkelt API som tar emot en bild och returnerar en ASCII-representation av den.
+**Idea:** Build a simple API that accepts an image and returns an ASCII representation of it.
 
-**Teknikstack:**
+**Tech Stack:**
 
 - Node.js (>=20.17.0)
-- Hono (lättviktigt webbramverk)
-- Sharp (bildbehandling)
-- Vitest (testning)
+- Hono (lightweight web framework)
+- Sharp (image processing)
+- Vitest (testing)
 
 ## Installation
 
@@ -21,51 +21,51 @@ En webbtjänst som konverterar bilder till ASCII-konst.
 npm install
 ```
 
-## Konfiguration
+## Configuration
 
-Kopiera `.env.example` och sätt din API-nyckel:
+Copy `.env.example` and set your API key:
 
 ```bash
 cp .env.example .env
 ```
 
-Redigera `.env`:
+Edit `.env`:
 
 ```bash
-# Generera en säker nyckel
+# Generate a secure key
 API_KEY=$(openssl rand -hex 32)
 echo "API_KEY=$API_KEY" > .env
 ```
 
-| Miljövariabel | Beskrivning              | Obligatorisk        |
-| ------------- | ------------------------ | ------------------- |
-| `API_KEY`     | Nyckel för autentisering | Ja                  |
-| `PORT`        | Port för servern         | Nej (default: 3000) |
+| Environment Variable | Description               | Required            |
+| -------------------- | ------------------------- | ------------------- |
+| `API_KEY`            | Key for authentication    | Yes                 |
+| `PORT`               | Port for the server       | No (default: 3000)  |
 
-> **Obs:** Servern vägrar starta utan `API_KEY`. Detta säkerställer att API:et aldrig körs oskyddat.
+> **Note:** The server refuses to start without `API_KEY`. This ensures the API never runs unprotected.
 
-## Användning
+## Usage
 
-Starta servern:
+Start the server:
 
 ```bash
 npm start
 ```
 
-Servern läser `API_KEY` från `.env`-filen (se Konfiguration ovan).
+The server reads `API_KEY` from the `.env` file (see Configuration above).
 
-Konvertera en bild:
+Convert an image:
 
 ```bash
 curl -X POST \
   -H "X-API-Key: $API_KEY" \
-  -F "image=@din-bild.png" \
+  -F "image=@your-image.png" \
   "http://localhost:3000/convert?width=80"
 ```
 
-> **Tips:** Använd `source .env` för att ladda miljövariabler i din shell innan du kör curl.
+> **Tip:** Use `source .env` to load environment variables in your shell before running curl.
 
-Exempel på output:
+Example output:
 
 ```
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -82,16 +82,16 @@ Exempel på output:
 @@@@@@@@@@%#*+++++*%@@@@@@@@@@
 ```
 
-## Utveckling
+## Development
 
 ```bash
-# Starta i watch-mode
+# Start in watch mode
 npm run dev
 
-# Kör tester
+# Run tests
 npm test
 
-# Kör tester en gång
+# Run tests once
 npm run test:run
 ```
 
@@ -99,7 +99,7 @@ npm run test:run
 
 ### GET /
 
-Returnerar API-information och gränser. Kräver ingen autentisering.
+Returns API information and limits. Does not require authentication.
 
 **Response:**
 
@@ -119,20 +119,20 @@ Returnerar API-information och gränser. Kräver ingen autentisering.
 
 ### POST /convert
 
-Konverterar en uppladdad bild till ASCII. **Kräver autentisering.**
+Converts an uploaded image to ASCII. **Requires authentication.**
 
 **Headers:**
 
-- `X-API-Key` - Din API-nyckel (obligatorisk om `API_KEY` är satt)
+- `X-API-Key` - Your API key (required if `API_KEY` is set)
 
 **Request:**
 
 - Content-Type: `multipart/form-data`
-- Body: `image` - bildfilen (max 10 MB)
+- Body: `image` - image file (max 10 MB)
 
-**Query-parametrar:**
+**Query parameters:**
 
-- `width` (valfri) - antal tecken bred, 20-200 (default: 80)
+- `width` (optional) - number of characters wide, 20-200 (default: 80)
 
 **Response (200):**
 
@@ -143,126 +143,126 @@ Konverterar en uppladdad bild till ASCII. **Kräver autentisering.**
 }
 ```
 
-**Felresponser:**
+**Error responses:**
 
-| Status | Beskrivning                                     |
+| Status | Description                                     |
 | ------ | ----------------------------------------------- |
-| 400    | Ingen bild, för stor fil, eller ogiltigt format |
-| 401    | Saknad eller ogiltig API-nyckel                 |
-| 500    | Internt fel vid konvertering                    |
+| 400    | No image, file too large, or invalid format     |
+| 401    | Missing or invalid API key                      |
+| 500    | Internal error during conversion                |
 
-## Säkerhet
+## Security
 
-API:et har följande skydd:
+The API has the following protections:
 
-| Skydd              | Beskrivning                                                    |
-| ------------------ | -------------------------------------------------------------- |
-| **API-nyckel**     | Alla requests till `/convert` kräver giltig `X-API-Key` header |
-| **Filstorlek**     | Max 10 MB per uppladdning                                      |
-| **Width-gränser**  | Begränsat till 20-200 tecken för att förhindra resursattacker  |
-| **Felmeddelanden** | Generiska fel till klient (läcker inte intern information)     |
+| Protection         | Description                                                      |
+| ------------------ | ---------------------------------------------------------------- |
+| **API key**        | All requests to `/convert` require a valid `X-API-Key` header   |
+| **File size**      | Max 10 MB per upload                                             |
+| **Width limits**   | Limited to 20-200 characters to prevent resource attacks         |
+| **Error messages** | Generic errors to client (does not leak internal information)    |
 
-### Rekommendationer för produktion
+### Production Recommendations
 
-- Använd alltid en stark, slumpmässig API-nyckel
-- Kör bakom en reverse proxy (nginx, Cloudflare)
-- Överväg rate limiting på proxy-nivå
-- Använd HTTPS
+- Always use a strong, random API key
+- Run behind a reverse proxy (nginx, Cloudflare)
+- Consider rate limiting at the proxy level
+- Use HTTPS
 
 ---
 
-## Utvecklingsprocess
+## Development Process
 
-Detta avsnitt dokumenterar vår process - hur projektet kom till och utvecklades med hjälp av Claude Code.
+This section documents our process - how the project came to be and was developed with the help of Claude Code.
 
-### Bakgrund
+### Background
 
-Projektet startade med en enkel idé vid morgonkaffet: "Tänk om man kunde konvertera bilder till ASCII-tecken via ett API?"
+The project started with a simple idea over morning coffee: "What if you could convert images to ASCII characters via an API?"
 
-Utvecklaren (backend-programmerare med erfarenhet av PHP, Node.js och C#) ville:
+The developer (backend programmer with experience in PHP, Node.js, and C#) wanted to:
 
-- Utforska bildhantering i Node.js (ett område utan tidigare erfarenhet)
-- Bygga något konkret och fungerande
-- Förstå koden som skapas (inte för komplext)
-- Testa hur AI-assisterad utveckling fungerar i praktiken
+- Explore image handling in Node.js (an area without previous experience)
+- Build something concrete and working
+- Understand the code being created (not too complex)
+- Test how AI-assisted development works in practice
 
-### Tekniska beslut
+### Technical Decisions
 
-**Varför Hono istället för Express?**
-Express kändes för stort för projektet. Med Hono håller vi dörren öppen för:
+**Why Hono instead of Express?**
+Express felt too large for the project. With Hono, we keep the door open for:
 
-- CLI-verktyg
-- Serverless-deployment (Cloudflare Workers, AWS Lambda)
-- Enklare kodbas
+- CLI tools
+- Serverless deployment (Cloudflare Workers, AWS Lambda)
+- Simpler codebase
 
-**Varför Sharp?**
-Sharp är ett etablerat bibliotek för bildbehandling i Node.js. Det är snabbt och hanterar det vi behöver:
+**Why Sharp?**
+Sharp is an established library for image processing in Node.js. It's fast and handles what we need:
 
-- Läsa olika bildformat
-- Konvertera till gråskala
-- Hämta pixeldata
+- Read various image formats
+- Convert to grayscale
+- Retrieve pixel data
 
-**Varför API-nyckel för autentisering?**
-Enklast möjliga säkerhet som fungerar. Passar för:
+**Why API key for authentication?**
+The simplest possible security that works. Suitable for:
 
-- Testprojekt och interna verktyg
-- Lätt att förstå och implementera
-- Kan enkelt uppgraderas senare
+- Test projects and internal tools
+- Easy to understand and implement
+- Can be easily upgraded later
 
 ### Process
 
-Så här gick utvecklingen till:
+This is how the development went:
 
-1. **Idédiskussion** - Diskuterade projektidén och satte ramar
-2. **Teknikval** - Valde Hono, Sharp och Vitest baserat på krav
-3. **Projektplan** - Claude Code skapade [docs/PLAN.md](docs/PLAN.md) med struktur och algoritm
-4. **Setup** - Skapade projektstruktur, package.json, git-konfiguration
-5. **Converter-modul** - Implementerade kärnlogiken steg för steg med förklaringar
-6. **Testning** - Skapade testbilder programmatiskt (gradient, cirkel) och skrev tester
-7. **API-endpoint** - Kopplade ihop Hono med converter-modulen
-8. **Säkerhet** - Lade till API-nyckel, filgränser och inputvalidering
-9. **Dokumentation** - Uppdaterade README och PLAN.md
+1. **Idea discussion** - Discussed the project idea and set boundaries
+2. **Technology selection** - Chose Hono, Sharp, and Vitest based on requirements
+3. **Project plan** - Claude Code created [docs/PLAN.md](docs/PLAN.md) with structure and algorithm
+4. **Setup** - Created project structure, package.json, git configuration
+5. **Converter module** - Implemented core logic step by step with explanations
+6. **Testing** - Created test images programmatically (gradient, circle) and wrote tests
+7. **API endpoint** - Connected Hono with the converter module
+8. **Security** - Added API key, file limits, and input validation
+9. **Documentation** - Updated README and PLAN.md
 
-### Hur samarbetet fungerade
+### How the Collaboration Worked
 
-- **Förklaringar längs vägen** - Claude förklarade varje steg i algoritmen så att koden blev begriplig
-- **Diskussion före implementation** - Vi diskuterade alternativ (t.ex. Express vs Hono) innan beslut
-- **Iterativ utveckling** - Byggde en funktion i taget, testade, committade
-- **Säkerhetstänk** - Utvecklaren frågade om säkerhet, Claude föreslog åtgärder
-- **Dokumentation** - Allt dokumenterades löpande
+- **Explanations along the way** - Claude explained each step in the algorithm so the code became understandable
+- **Discussion before implementation** - We discussed alternatives (e.g., Express vs Hono) before decisions
+- **Iterative development** - Built one function at a time, tested, committed
+- **Security mindset** - The developer asked about security, Claude proposed measures
+- **Documentation** - Everything was documented continuously
 
-### Lärdomar
+### Lessons Learned
 
-Se [docs/RETROSPECTIVE.md](docs/RETROSPECTIVE.md) för en fullständig genomgång av:
+See [docs/RETROSPECTIVE.md](docs/RETROSPECTIVE.md) for a complete review of:
 
-- Vad som fungerade bra
-- Vad som kunde gjorts bättre
-- Tips för framtida projekt med Claude Code
+- What worked well
+- What could have been done better
+- Tips for future projects with Claude Code
 
 ---
 
-## Projektstruktur
+## Project Structure
 
 ```
 image-to-ascii/
 ├── src/
-│   ├── index.js          # API-server med Hono
-│   ├── converter.js      # Bild → ASCII-konvertering
-│   └── charsets.js       # ASCII-teckenuppsättningar
+│   ├── index.js          # API server with Hono
+│   ├── converter.js      # Image → ASCII conversion
+│   └── charsets.js       # ASCII character sets
 ├── test/
-│   ├── converter.test.js # Enhetstester
-│   ├── create-test-image.js  # Genererar testbilder
-│   └── fixtures/         # Testbilder (genererade)
+│   ├── converter.test.js # Unit tests
+│   ├── create-test-image.js  # Generates test images
+│   └── fixtures/         # Test images (generated)
 ├── docs/
-│   ├── PLAN.md           # Projektplan och beslut
-│   └── RETROSPECTIVE.md  # Lärdomar från projektet
-├── .env.example          # Mall för miljövariabler
+│   ├── PLAN.md           # Project plan and decisions
+│   └── RETROSPECTIVE.md  # Lessons from the project
+├── .env.example          # Template for environment variables
 ├── package.json
 └── README.md
 ```
 
 ---
 
-## Licens
+## License
 
 MIT
