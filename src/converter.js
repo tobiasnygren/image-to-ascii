@@ -1,7 +1,7 @@
 /**
  * Converts images to ASCII art
  */
-import sharp from 'sharp';
+import { processImage } from './imageProcessors/sharp.js';
 import { standard as defaultCharset } from './charsets.js';
 
 /**
@@ -16,46 +16,16 @@ import { standard as defaultCharset } from './charsets.js';
 export async function convertToAscii(imageBuffer, options = {}) {
   const { width = 80, charset = defaultCharset } = options;
 
-  // Step 1: Load the image and get metadata
-  const image = sharp(imageBuffer);
-  const metadata = await image.metadata();
+  // Step 1: Decode image, convert to grayscale and scale down
+  const { data, width: w, height: h } = await processImage(imageBuffer, width);
 
-  // Validate that the image has valid dimensions
-  const imgWidth = metadata.width;
-  const imgHeight = metadata.height;
-
-  if (
-    !Number.isFinite(imgWidth) ||
-    !Number.isFinite(imgHeight) ||
-    imgWidth <= 0 ||
-    imgHeight <= 0
-  ) {
-    throw new Error('Invalid image dimensions');
-  }
-
-  // Step 2: Calculate height with adjustment for character proportions
-  // Characters are roughly twice as tall as they are wide, so we halve the height
-  const aspectRatio = imgHeight / imgWidth;
-  const height = Math.max(1, Math.round(width * aspectRatio * 0.5));
-
-  // Step 3: Convert to grayscale and scale down
-  const { data, info } = await image
-    .greyscale() // Convert to grayscale
-    .resize(width, height, {
-      // Scale to desired size
-      fit: 'fill'
-    })
-    .raw() // Get raw pixel data (not PNG/JPG)
-    .toBuffer({ resolveWithObject: true });
-
-  // Step 4: Build ASCII string
-  // 'data' is a Buffer where each byte is the brightness (0-255) for a pixel
+  // Step 2: Build ASCII string
+  // 'data' is a flat Uint8Array where each byte is the brightness (0-255) for a pixel
   const asciiChars = [];
 
-  for (let y = 0; y < info.height; y++) {
-    for (let x = 0; x < info.width; x++) {
-      const pixelIndex = y * info.width + x;
-      const brightness = data[pixelIndex];
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const brightness = data[y * w + x];
       asciiChars.push(brightnessToChar(brightness, charset));
     }
     asciiChars.push('\n');

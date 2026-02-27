@@ -25,6 +25,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@cf-wasm/photon": "^0.3.4",
     "@hono/node-server": "^1.8.0",
     "hono": "^4.0.0",
     "sharp": "^0.33.0"
