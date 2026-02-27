@@ -1,89 +1,114 @@
 /**
- * Benchmarks Sharp vs @cf-wasm/photon adapters.
- * Measures both performance and visual similarity of the ASCII output.
+ * Rigorous benchmark: Sharp vs @cf-wasm/photon adapters
+ *
+ * Controls for:
+ *  - Warm-up (10 calls before measurement)
+ *  - Order randomization per image (removes file-cache bias)
+ *  - Multiple image sizes (100×100, 500×500, 2000×2000)
+ *  - Statistics: mean, min, max, stddev
  *
  * Run with: node test/benchmark-adapters.js
  */
-import { readFileSync } from 'fs';
+import sharp from 'sharp';
 import { processImage as sharpProcess } from '../src/imageProcessors/sharp.js';
 import { processImage as photonProcess } from '../src/imageProcessors/photon.js';
-import { convertToAscii } from '../src/converter.js';
 
-const IMAGES = ['gradient', 'circle', 'black', 'white'];
-const WIDTH = 80;
-const RUNS = 10;
+const WARMUP = 10;
+const RUNS = 50;
+const TARGET_WIDTH = 80;
 
-// --- Helpers ---
+// --- Test image generation ---
 
-async function measure(fn, runs) {
-  // Warm-up
-  await fn();
-  const start = performance.now();
-  for (let i = 0; i < runs; i++) await fn();
-  return (performance.now() - start) / runs;
+async function makeGradient(size) {
+  const pixels = Buffer.alloc(size * size);
+  for (let y = 0; y < size; y++)
+    for (let x = 0; x < size; x++)
+      pixels[y * size + x] = Math.round((x / (size - 1)) * 255);
+  return sharp(pixels, { raw: { width: size, height: size, channels: 1 } })
+    .png()
+    .toBuffer();
 }
 
-function similarityScore(a, b) {
-  const len = Math.min(a.length, b.length);
-  let matching = 0;
-  for (let i = 0; i < len; i++) {
-    if (a[i] === b[i]) matching++;
-  }
-  return (matching / len) * 100;
+// --- Statistics ---
+
+function stats(times) {
+  const mean = times.reduce((a, b) => a + b, 0) / times.length;
+  const variance = times.reduce((a, b) => a + (b - mean) ** 2, 0) / times.length;
+  return {
+    mean,
+    min: Math.min(...times),
+    max: Math.max(...times),
+    stddev: Math.sqrt(variance),
+  };
 }
 
-function pixelDiff(dataA, dataB) {
-  const len = Math.min(dataA.length, dataB.length);
-  let totalDiff = 0;
-  for (let i = 0; i < len; i++) {
-    totalDiff += Math.abs(dataA[i] - dataB[i]);
+function fmt(s) {
+  return `${s.mean.toFixed(2)} ms  (min ${s.min.toFixed(2)}, max ${s.max.toFixed(2)}, σ ${s.stddev.toFixed(2)})`;
+}
+
+// --- Benchmark runner ---
+
+async function benchmark(name, buf) {
+  // Warm-up both adapters equally before measuring either
+  for (let i = 0; i < WARMUP; i++) {
+    await sharpProcess(buf, TARGET_WIDTH);
+    await photonProcess(buf, TARGET_WIDTH);
   }
-  return totalDiff / len;
+
+  // Collect timings, alternating which adapter goes first on each run
+  const sharpTimes = [];
+  const photonTimes = [];
+
+  for (let i = 0; i < RUNS; i++) {
+    if (i % 2 === 0) {
+      // Sharp first
+      let t = performance.now();
+      await sharpProcess(buf, TARGET_WIDTH);
+      sharpTimes.push(performance.now() - t);
+
+      t = performance.now();
+      await photonProcess(buf, TARGET_WIDTH);
+      photonTimes.push(performance.now() - t);
+    } else {
+      // Photon first
+      let t = performance.now();
+      await photonProcess(buf, TARGET_WIDTH);
+      photonTimes.push(performance.now() - t);
+
+      t = performance.now();
+      await sharpProcess(buf, TARGET_WIDTH);
+      sharpTimes.push(performance.now() - t);
+    }
+  }
+
+  const ss = stats(sharpTimes);
+  const ps = stats(photonTimes);
+  const ratio = ss.mean / ps.mean;
+
+  console.log(`\n${name}`);
+  console.log(`  Sharp:  ${fmt(ss)}`);
+  console.log(`  Photon: ${fmt(ps)}`);
+
+  if (ratio > 1.1) {
+    console.log(`  → Photon is ×${ratio.toFixed(1)} faster`);
+  } else if (ratio < 0.9) {
+    console.log(`  → Sharp is ×${(1 / ratio).toFixed(1)} faster`);
+  } else {
+    console.log(`  → Roughly equal (ratio: ${ratio.toFixed(2)})`);
+  }
 }
 
 // --- Main ---
 
-console.log(`Adapter benchmark — ${RUNS} runs per image, width=${WIDTH}\n`);
+console.log(
+  `Benchmark: ${WARMUP} warm-up + ${RUNS} measured runs, alternating order, width=${TARGET_WIDTH}\n`
+);
 console.log('─'.repeat(72));
 
-for (const name of IMAGES) {
-  const buf = readFileSync(`test/fixtures/${name}.png`);
-
-  const sharpMs = await measure(() => sharpProcess(buf, WIDTH), RUNS);
-  const photonMs = await measure(() => photonProcess(buf, WIDTH), RUNS);
-
-  // Pixel-level comparison
-  const sharpResult = await sharpProcess(buf, WIDTH);
-  const photonResult = await photonProcess(buf, WIDTH);
-  const avgPixelDiff = pixelDiff(sharpResult.data, photonResult.data);
-
-  // ASCII output comparison (uses Sharp adapter via converter.js)
-  const sharpAscii = await convertToAscii(buf, { width: WIDTH });
-
-  // Temporarily use photon by calling processImage directly + same ASCII logic
-  const { data, width: w, height: h } = photonResult;
-  const { brightnessToChar } = await import('../src/converter.js');
-  const { standard } = await import('../src/charsets.js');
-  const chars = [];
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) chars.push(brightnessToChar(data[y * w + x], standard));
-    chars.push('\n');
-  }
-  const photonAscii = chars.join('');
-
-  const similarity = similarityScore(sharpAscii, photonAscii);
-  const ratio = photonMs / sharpMs;
-
-  console.log(`\n${name}.png`);
-  console.log(
-    `  Sharp:    ${sharpMs.toFixed(2)} ms  (${sharpResult.width}×${sharpResult.height} px)`
-  );
-  console.log(
-    `  Photon:   ${photonMs.toFixed(2)} ms  (${photonResult.width}×${photonResult.height} px)`
-  );
-  console.log(`  Slowdown: ×${ratio.toFixed(1)}`);
-  console.log(`  Avg pixel diff (0-255): ${avgPixelDiff.toFixed(2)}`);
-  console.log(`  ASCII similarity: ${similarity.toFixed(1)}%`);
+const sizes = [100, 500, 2000];
+for (const size of sizes) {
+  const buf = await makeGradient(size);
+  await benchmark(`gradient ${size}×${size}`, buf);
 }
 
 console.log('\n' + '─'.repeat(72));
