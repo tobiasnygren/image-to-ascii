@@ -3,7 +3,7 @@
  *
  * Controls for:
  *  - Warm-up (10 calls before measurement)
- *  - Order randomization per image (removes file-cache bias)
+ *  - Alternating order per image (reduces file-cache bias)
  *  - Multiple image sizes (100×100, 500×500, 2000×2000)
  *  - Statistics: mean, min, max, stddev
  *

@@ -14,13 +14,24 @@ export async function processImage(imageBuffer, targetWidth) {
     throw new Error('Invalid target width');
   }
 
-  const bytes = new Uint8Array(imageBuffer);
+  let bytes;
+  if (imageBuffer instanceof Uint8Array) {
+    // Includes Node.js Buffer, which is a Uint8Array subclass — no copy needed.
+    bytes = imageBuffer;
+  } else if (ArrayBuffer.isView(imageBuffer)) {
+    // Reuse the underlying buffer without copying.
+    bytes = new Uint8Array(imageBuffer.buffer, imageBuffer.byteOffset, imageBuffer.byteLength);
+  } else {
+    // Fallback for ArrayBuffer or array-like input.
+    bytes = new Uint8Array(imageBuffer);
+  }
 
   let image;
   try {
     image = PhotonImage.new_from_byteslice(bytes);
   } catch (err) {
-    throw new Error(`Failed to decode image: ${err.message}`);
+    const message = err instanceof Error ? err.message : String(err);
+    throw new Error(`Failed to decode image: ${message}`);
   }
 
   const imgWidth = image.get_width();
