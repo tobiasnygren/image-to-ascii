@@ -9,6 +9,7 @@
     "dev": "node --watch src/index.js",
     "test": "vitest",
     "test:run": "vitest run",
+    "benchmark": "node benchmarks/benchmark-adapters.js",
     "generate-fixtures": "node test/create-test-image.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -25,6 +26,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@cf-wasm/photon": "^0.3.4",
     "@hono/node-server": "^1.8.0",
     "hono": "^4.0.0",
     "sharp": "^0.33.0"
