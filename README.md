@@ -37,10 +37,10 @@ API_KEY=$(openssl rand -hex 32)
 echo "API_KEY=$API_KEY" > .env
 ```
 
-| Environment Variable | Description               | Required            |
-| -------------------- | ------------------------- | ------------------- |
-| `API_KEY`            | Key for authentication    | Yes                 |
-| `PORT`               | Port for the server       | No (default: 3000)  |
+| Environment Variable | Description            | Required           |
+| -------------------- | ---------------------- | ------------------ |
+| `API_KEY`            | Key for authentication | Yes                |
+| `PORT`               | Port for the server    | No (default: 3000) |
 
 > **Note:** The server refuses to start without `API_KEY`. This ensures the API never runs unprotected.
 
@@ -145,22 +145,22 @@ Converts an uploaded image to ASCII. **Requires authentication.**
 
 **Error responses:**
 
-| Status | Description                                     |
-| ------ | ----------------------------------------------- |
-| 400    | No image, file too large, or invalid format     |
-| 401    | Missing or invalid API key                      |
-| 500    | Internal error during conversion                |
+| Status | Description                                 |
+| ------ | ------------------------------------------- |
+| 400    | No image, file too large, or invalid format |
+| 401    | Missing or invalid API key                  |
+| 500    | Internal error during conversion            |
 
 ## Security
 
 The API has the following protections:
 
-| Protection         | Description                                                      |
-| ------------------ | ---------------------------------------------------------------- |
-| **API key**        | All requests to `/convert` require a valid `X-API-Key` header   |
-| **File size**      | Max 10 MB per upload                                             |
-| **Width limits**   | Limited to 20-200 characters to prevent resource attacks         |
-| **Error messages** | Generic errors to client (does not leak internal information)    |
+| Protection         | Description                                                   |
+| ------------------ | ------------------------------------------------------------- |
+| **API key**        | All requests to `/convert` require a valid `X-API-Key` header |
+| **File size**      | Max 10 MB per upload                                          |
+| **Width limits**   | Limited to 20-200 characters to prevent resource attacks      |
+| **Error messages** | Generic errors to client (does not leak internal information) |
 
 ### Production Recommendations
 
