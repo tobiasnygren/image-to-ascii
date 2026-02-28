@@ -9,6 +9,7 @@
     "dev": "node --watch src/index.js",
     "test": "vitest",
     "test:run": "vitest run",
+    "benchmark": "node benchmarks/benchmark-adapters.js",
     "generate-fixtures": "node test/create-test-image.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

@@ -7,7 +7,7 @@
  *  - Multiple image sizes (100×100, 500×500, 2000×2000)
  *  - Statistics: mean, min, max, stddev
  *
- * Run with: node test/benchmark-adapters.js
+ * Run with: node benchmarks/benchmark-adapters.js
  */
 import sharp from 'sharp';
 import { processImage as sharpProcess } from '../src/imageProcessors/sharp.js';
@@ -22,8 +22,7 @@ const TARGET_WIDTH = 80;
 async function makeGradient(size) {
   const pixels = Buffer.alloc(size * size);
   for (let y = 0; y < size; y++)
-    for (let x = 0; x < size; x++)
-      pixels[y * size + x] = Math.round((x / (size - 1)) * 255);
+    for (let x = 0; x < size; x++) pixels[y * size + x] = Math.round((x / (size - 1)) * 255);
   return sharp(pixels, { raw: { width: size, height: size, channels: 1 } })
     .png()
     .toBuffer();
@@ -38,7 +37,7 @@ function stats(times) {
     mean,
     min: Math.min(...times),
     max: Math.max(...times),
-    stddev: Math.sqrt(variance),
+    stddev: Math.sqrt(variance)
   };
 }
 

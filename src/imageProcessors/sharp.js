@@ -7,6 +7,10 @@
 import sharp from 'sharp';
 
 export async function processImage(imageBuffer, targetWidth) {
+  if (!Number.isFinite(targetWidth) || targetWidth <= 0) {
+    throw new Error('Invalid target width');
+  }
+
   const image = sharp(imageBuffer);
   const metadata = await image.metadata();
 

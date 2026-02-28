@@ -10,19 +10,28 @@
 import { PhotonImage, SamplingFilter, resize, grayscale } from '@cf-wasm/photon';
 
 export async function processImage(imageBuffer, targetWidth) {
+  if (!Number.isFinite(targetWidth) || targetWidth <= 0) {
+    throw new Error('Invalid target width');
+  }
+
   const bytes = new Uint8Array(imageBuffer);
 
   let image;
   try {
     image = PhotonImage.new_from_byteslice(bytes);
-  } catch {
-    throw new Error('Invalid image dimensions');
+  } catch (err) {
+    throw new Error(`Failed to decode image: ${err.message}`);
   }
 
   const imgWidth = image.get_width();
   const imgHeight = image.get_height();
 
-  if (!imgWidth || !imgHeight) {
+  if (
+    !Number.isFinite(imgWidth) ||
+    !Number.isFinite(imgHeight) ||
+    imgWidth <= 0 ||
+    imgHeight <= 0
+  ) {
     image.free();
     throw new Error('Invalid image dimensions');
   }
@@ -31,18 +40,30 @@ export async function processImage(imageBuffer, targetWidth) {
   const targetHeight = Math.max(1, Math.round(targetWidth * aspectRatio * 0.5));
 
   grayscale(image);
-  const resized = resize(image, targetWidth, targetHeight, SamplingFilter.Lanczos3);
-  image.free();
+
+  let resized;
+  try {
+    resized = resize(image, targetWidth, targetHeight, SamplingFilter.Lanczos3);
+  } finally {
+    image.free();
+  }
 
   // get_raw_pixels() returns RGBA (4 bytes per pixel).
   // After grayscale, R = G = B = brightness, so we extract the R channel.
-  const rgba = resized.get_raw_pixels();
-  resized.free();
+  let rgba;
+  let actualWidth, actualHeight;
+  try {
+    rgba = resized.get_raw_pixels();
+    actualWidth = resized.get_width();
+    actualHeight = resized.get_height();
+  } finally {
+    resized.free();
+  }
 
-  const data = new Uint8Array(targetWidth * targetHeight);
+  const data = new Uint8Array(actualWidth * actualHeight);
   for (let i = 0; i < data.length; i++) {
     data[i] = rgba[i * 4];
   }
 
-  return { data, width: targetWidth, height: targetHeight };
+  return { data, width: actualWidth, height: actualHeight };
 }
